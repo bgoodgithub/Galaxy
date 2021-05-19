@@ -81,7 +81,7 @@ class MainWidget(Widget):
         spacing_y = self.h_lines_spacing * self.height
 
         for i in range(0, self.h_nb_lines):
-            line_y = i * spacing_y-self.current_offset_y
+            line_y = i * spacing_y - self.current_offset_y
             x1, y1 = self.transform(xmin, line_y)
             x2, y2 = self.transform(xmax, line_y)
             self.horizontal_lines[i].points = [x1, y1, x2, y2]
@@ -109,15 +109,15 @@ class MainWidget(Widget):
         return int(tr_x), int(tr_y)
 
     def update(self, dt):
-        # print("UPDATE")
+        # print(str(dt*60))
+        time_factor = dt*60
         self.update_vertical_lines()
         self.update_horizontal_lines()
-        self.current_offset_y += self.speed
+        self.current_offset_y += self.speed * time_factor
 
         spacing_y = self.h_lines_spacing * self.height
         if self.current_offset_y >= spacing_y:
             self.current_offset_y -= spacing_y
-
 
 
 class GalaxyApp(App):
