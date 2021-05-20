@@ -1,7 +1,10 @@
 from kivy.config import Config
+
 Config.set('graphics', 'width', '900')
 Config.set('graphics', 'height', '400')
 
+from kivy import platform
+from kivy.core.window import Window
 from kivy.app import App
 from kivy.graphics import Line, Color
 from kivy.properties import NumericProperty, Clock
@@ -32,7 +35,24 @@ class MainWidget(Widget):
         # print("INIT W: " + str(self.width) + " H: " + str(self.height))
         self.init_vertical_lines()
         self.init_horizontal_lines()
+
+        if self.is_dektop():
+            self._keyboard = Window.request_keyboard(self.keyboard_closed, self)
+            self._keyboard.bind(on_key_down=self.on_keyboard_down)
+            self._keyboard.bind(on_key_up=self.on_keyboard_up)
+
         Clock.schedule_interval(self.update, 1.0 / 60.0)
+
+    def keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self.on_keyboard_down)
+        self._keyboard.unbind(on_key_up=self.on_keyboard_up)
+        self._keyboard = None
+
+    def is_dektop(self):
+        if platform in ("linux", "win", "macosx"):
+            return True
+        else:
+            return False
 
     def on_parent(self, widget, parent):
         # print("ON PARENT W: " + str(self.width) + " H: " + str(self.height))
@@ -115,6 +135,17 @@ class MainWidget(Widget):
         tr_y = (1 - factor_y) * self.perspective_point_y
 
         return int(tr_x), int(tr_y)
+
+    def on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if keycode[1] == "left":
+            self.current_speed_x = self.speed_x
+        elif keycode[1] == "right":
+            self.current_speed_x = -self.speed_x
+        return True
+
+    def on_keyboard_up(self, keyboard, keycode):
+        self.current_speed_x = 0
+        return True
 
     def on_touch_down(self, touch):
         if touch.x < self.width / 2:
