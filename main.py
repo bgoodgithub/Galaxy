@@ -1,3 +1,7 @@
+from kivy.config import Config
+Config.set('graphics', 'width', '900')
+Config.set('graphics', 'height', '400')
+
 from kivy.app import App
 from kivy.graphics import Line, Color
 from kivy.properties import NumericProperty, Clock
@@ -18,6 +22,10 @@ class MainWidget(Widget):
 
     speed = 4
     current_offset_y = 0
+
+    speed_x = 12
+    current_speed_x = 0
+    current_offset_x = 0
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
@@ -59,7 +67,7 @@ class MainWidget(Widget):
         spacing = self.v_lines_spacing * self.width
         offset = -int(self.v_nb_lines / 2) + 0.5  # 0.5 term makes so empty space in middle instead of line
         for i in range(0, self.v_nb_lines):
-            line_x = int(central_line_x + offset * spacing)
+            line_x = int(central_line_x + offset * spacing + self.current_offset_x)
             x1, y1 = self.transform(line_x, 0)
             x2, y2 = self.transform(line_x, self.height)
             self.vertical_lines[i].points = [x1, y1, x2, y2]
@@ -76,8 +84,8 @@ class MainWidget(Widget):
         spacing = self.v_lines_spacing * self.width
         offset = int(self.v_nb_lines / 2) - 0.5
 
-        xmin = central_line_x - offset * spacing
-        xmax = central_line_x + offset * spacing
+        xmin = central_line_x - offset * spacing + self.current_offset_x
+        xmax = central_line_x + offset * spacing + self.current_offset_x
         spacing_y = self.h_lines_spacing * self.height
 
         for i in range(0, self.h_nb_lines):
@@ -108,6 +116,18 @@ class MainWidget(Widget):
 
         return int(tr_x), int(tr_y)
 
+    def on_touch_down(self, touch):
+        if touch.x < self.width / 2:
+            # print("<-")
+            self.current_speed_x = self.speed_x
+        if touch.x > self.width / 2:
+            # print("->")
+            self.current_speed_x = -self.speed_x
+
+    def on_touch_up(self, touch):
+        # print("UP")
+        self.current_speed_x = 0
+
     def update(self, dt):
         # print(str(dt*60))
         time_factor = dt*60
@@ -118,6 +138,8 @@ class MainWidget(Widget):
         spacing_y = self.h_lines_spacing * self.height
         if self.current_offset_y >= spacing_y:
             self.current_offset_y -= spacing_y
+
+        self.current_offset_x += self.current_speed_x * time_factor
 
 
 class GalaxyApp(App):
