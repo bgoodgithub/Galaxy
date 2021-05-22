@@ -27,11 +27,11 @@ class MainWidget(Widget):
     h_lines_spacing = .1
     horizontal_lines = []
 
-    speed = .75
+    speed = .3
     current_offset_y = 0
     current_y_loop = 0
 
-    speed_x = 1
+    speed_x = .5
     current_speed_x = 0
     current_offset_x = 0
 
@@ -43,6 +43,7 @@ class MainWidget(Widget):
     ship_height = 0.035
     ship_base_y = 0.04
     ship = None
+    ship_coordinates = [(0, 0), (0, 0), (0, 0)]
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
@@ -77,11 +78,34 @@ class MainWidget(Widget):
         base_y = self.ship_base_y * self.height
         ship_half_width = self.ship_width * self.width / 2
         ship_height = self.ship_height * self.height
-        x1, y1 = self.transform(center_x - ship_half_width, base_y)
-        x2, y2 = self.transform(center_x, base_y + ship_height)
-        x3, y3 = self.transform(center_x + ship_half_width, base_y)
+
+        self.ship_coordinates[0] = (center_x - ship_half_width, base_y)
+        self.ship_coordinates[1] = (center_x, base_y + ship_height)
+        self.ship_coordinates[2] = (center_x + ship_half_width, base_y)
+
+        x1, y1 = self.transform(*self.ship_coordinates[0])
+        x2, y2 = self.transform(*self.ship_coordinates[1])
+        x3, y3 = self.transform(*self.ship_coordinates[2])
 
         self.ship.points = [x1, y1, x2, y2, x3, y3]
+
+    def check_ship_collision(self):
+        for i in range(0, len(self.tiles_coordinates)):
+            ti_x, ti_y = self.tiles_coordinates[i]
+            if ti_y > self.current_y_loop + 1:
+                return False
+            if self.check_ship_collision_with_tile(ti_x, ti_y):
+                return True
+        return False
+
+    def check_ship_collision_with_tile(self, ti_x, ti_y):
+        xmin, ymin = self.get_tile_coordinates(ti_x, ti_y)
+        xmax, ymax = self.get_tile_coordinates(ti_x + 1, ti_y + 1)
+        for i in range(0, 3):
+            px, py = self.ship_coordinates[i]
+            if xmin <= px <= xmax and ymin <= py <= ymax:
+                return True
+        return False
 
     def init_tiles(self):
         with self.canvas:
@@ -215,6 +239,9 @@ class MainWidget(Widget):
 
         speed_x = self.current_speed_x * self.width / 100
         self.current_offset_x += speed_x * time_factor
+
+        if not self.check_ship_collision():
+            print("GAME OVER")
 
 
 class GalaxyApp(App):
