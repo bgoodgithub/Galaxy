@@ -1,6 +1,8 @@
 import random
 
 from kivy.config import Config
+from kivy.lang import Builder
+from kivy.uix.relativelayout import RelativeLayout
 
 Config.set('graphics', 'width', '900')
 Config.set('graphics', 'height', '400')
@@ -12,8 +14,10 @@ from kivy.graphics import Line, Color, Quad, Triangle
 from kivy.properties import NumericProperty, Clock
 from kivy.uix.widget import Widget
 
+Builder.load_file("menu.kv")
 
-class MainWidget(Widget):
+
+class MainWidget(RelativeLayout):
     from transforms import transform, transform_2d, transform_perspective
     from user_actions import keyboard_closed, on_keyboard_up, on_keyboard_down, on_touch_down, on_touch_up
     perspective_point_x = NumericProperty(0)
@@ -197,7 +201,7 @@ class MainWidget(Widget):
             tile.points = [x1, y1, x2, y2, x3, y3, x4, y4]
 
     def update_vertical_lines(self):
-        start_index = -int(self.v_nb_lines/2) + 1
+        start_index = -int(self.v_nb_lines / 2) + 1
         for i in range(start_index, start_index + self.v_nb_lines):
             line_x = self.get_line_x_from_index(i)
             x1, y1 = self.transform(line_x, 0)
@@ -211,7 +215,7 @@ class MainWidget(Widget):
                 self.horizontal_lines.append(Line())
 
     def update_horizontal_lines(self):
-        start_index = -int(self.v_nb_lines/2) + 1
+        start_index = -int(self.v_nb_lines / 2) + 1
         end_index = start_index + self.v_nb_lines - 1
         xmin = self.get_line_x_from_index(start_index)
         xmax = self.get_line_x_from_index(end_index)
@@ -223,7 +227,7 @@ class MainWidget(Widget):
 
     def update(self, dt):
         # print(str(dt*60))
-        time_factor = dt*60
+        time_factor = dt * 60
         self.update_vertical_lines()
         self.update_horizontal_lines()
         self.update_tiles()
