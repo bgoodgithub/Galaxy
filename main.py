@@ -25,8 +25,9 @@ class MainWidget(Widget):
     h_lines_spacing = .1
     horizontal_lines = []
 
-    speed = 4
+    speed = 1
     current_offset_y = 0
+    current_y_loop = 0
 
     speed_x = 12
     current_speed_x = 0
@@ -34,7 +35,7 @@ class MainWidget(Widget):
 
     tile = None
     ti_x = 0
-    ti_y = 0
+    ti_y = 5
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
@@ -58,7 +59,7 @@ class MainWidget(Widget):
 
     def init_tiles(self):
         with self.canvas:
-            Color(1, .5, 1)
+            Color(.3, .7, 1)
             self.tile = Quad()
 
     def init_vertical_lines(self):
@@ -81,6 +82,7 @@ class MainWidget(Widget):
         return line_y
 
     def get_tile_coordinates(self, ti_x, ti_y):
+        ti_y = ti_y - self.current_y_loop
         x = self.get_line_x_from_index(ti_x)
         y = self.get_line_y_from_index(ti_y)
         return x, y
@@ -132,6 +134,8 @@ class MainWidget(Widget):
         spacing_y = self.h_lines_spacing * self.height
         if self.current_offset_y >= spacing_y:
             self.current_offset_y -= spacing_y
+            self.current_y_loop += 1
+            # print("loop" + str(self.current_y_loop))
 
         self.current_offset_x += self.current_speed_x * time_factor
 
