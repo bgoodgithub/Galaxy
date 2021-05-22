@@ -1,3 +1,5 @@
+import random
+
 from kivy.config import Config
 
 Config.set('graphics', 'width', '900')
@@ -17,15 +19,15 @@ class MainWidget(Widget):
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
-    v_nb_lines = 10
+    v_nb_lines = 6
     v_lines_spacing = .25  # percentage of screen width
     vertical_lines = []
 
-    h_nb_lines = 15
-    h_lines_spacing = .1
+    h_nb_lines = 5
+    h_lines_spacing = .25
     horizontal_lines = []
 
-    speed = 1
+    speed = 4
     current_offset_y = 0
     current_y_loop = 0
 
@@ -65,6 +67,7 @@ class MainWidget(Widget):
                 self.tiles.append(Quad())
 
     def generate_tiles_coordinates(self):
+        last_x = 0
         last_y = 0
 
         # clean coordinates that have left the screen
@@ -72,16 +75,27 @@ class MainWidget(Widget):
             if self.tiles_coordinates[i][1] < self.current_y_loop:
                 del self.tiles_coordinates[i]
 
+        # add new tile to the top of the list to keep the original number of tiles
         if len(self.tiles_coordinates) > 0:
             last_coordinates = self.tiles_coordinates[-1]
+            last_x = last_coordinates[0]
             last_y = last_coordinates[1] + 1
 
-
         for i in range(len(self.tiles_coordinates), self.nb_tiles):
-            self.tiles_coordinates.append((0, last_y))
-            last_y += 1
+            r = random.randint(0, 2)
+            self.tiles_coordinates.append((last_x, last_y))
+            if r == 1:
+                last_x += 1
+                self.tiles_coordinates.append((last_x, last_y))
+                last_y += 1
+                self.tiles_coordinates.append((last_x, last_y))
+            if r == 2:
+                last_x -= 1
+                self.tiles_coordinates.append((last_x, last_y))
+                last_y += 1
+                self.tiles_coordinates.append((last_x, last_y))
 
-        print("foo")
+            last_y += 1
 
     def init_vertical_lines(self):
         with self.canvas:
@@ -113,7 +127,7 @@ class MainWidget(Widget):
             tile = self.tiles[i]
             tile_coordinates = self.tiles_coordinates[i]
             xmin, ymin = self.get_tile_coordinates(tile_coordinates[0], tile_coordinates[1])
-            xmax, ymax = self.get_tile_coordinates(tile_coordinates[0] + 1, tile_coordinates[0] + 1)
+            xmax, ymax = self.get_tile_coordinates(tile_coordinates[0] + 1, tile_coordinates[1] + 1)
 
             x1, y1 = self.transform(xmin, ymin)
             x2, y2 = self.transform(xmin, ymax)
