@@ -8,7 +8,7 @@ Config.set('graphics', 'height', '400')
 from kivy import platform
 from kivy.core.window import Window
 from kivy.app import App
-from kivy.graphics import Line, Color, Quad
+from kivy.graphics import Line, Color, Quad, Triangle
 from kivy.properties import NumericProperty, Clock
 from kivy.uix.widget import Widget
 
@@ -19,25 +19,30 @@ class MainWidget(Widget):
     perspective_point_x = NumericProperty(0)
     perspective_point_y = NumericProperty(0)
 
-    v_nb_lines = 6
+    v_nb_lines = 12
     v_lines_spacing = .25  # percentage of screen width
     vertical_lines = []
 
-    h_nb_lines = 5
-    h_lines_spacing = .25
+    h_nb_lines = 15
+    h_lines_spacing = .1
     horizontal_lines = []
 
-    speed = 4
+    speed = .75
     current_offset_y = 0
     current_y_loop = 0
 
-    speed_x = 12
+    speed_x = 1
     current_speed_x = 0
     current_offset_x = 0
 
-    nb_tiles = 4
+    nb_tiles = 16
     tiles = []
     tiles_coordinates = []
+
+    ship_width = .075
+    ship_height = 0.035
+    ship_base_y = 0.04
+    ship = None
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
@@ -45,6 +50,8 @@ class MainWidget(Widget):
         self.init_vertical_lines()
         self.init_horizontal_lines()
         self.init_tiles()
+        self.init_ship()
+        self.pre_fill_tiles_coordinates()
         self.generate_tiles_coordinates()
 
         if self.is_dektop():
@@ -60,11 +67,31 @@ class MainWidget(Widget):
         else:
             return False
 
+    def init_ship(self):
+        with self.canvas:
+            Color(1, 1, 1)
+            self.ship = Triangle()
+
+    def update_ship(self):
+        center_x = self.width / 2
+        base_y = self.ship_base_y * self.height
+        ship_half_width = self.ship_width * self.width / 2
+        ship_height = self.ship_height * self.height
+        x1, y1 = self.transform(center_x - ship_half_width, base_y)
+        x2, y2 = self.transform(center_x, base_y + ship_height)
+        x3, y3 = self.transform(center_x + ship_half_width, base_y)
+
+        self.ship.points = [x1, y1, x2, y2, x3, y3]
+
     def init_tiles(self):
         with self.canvas:
             Color(.3, .7, 1)
             for i in range(0, self.nb_tiles):
                 self.tiles.append(Quad())
+
+    def pre_fill_tiles_coordinates(self):
+        for i in range(0, 15):
+            self.tiles_coordinates.append((0, i))
 
     def generate_tiles_coordinates(self):
         last_x = 0
@@ -84,6 +111,13 @@ class MainWidget(Widget):
         for i in range(len(self.tiles_coordinates), self.nb_tiles):
             r = random.randint(0, 2)
             self.tiles_coordinates.append((last_x, last_y))
+            start_index = -int(self.v_nb_lines / 2) + 1
+            end_index = start_index + self.v_nb_lines - 1
+            if last_x <= start_index:
+                r = 1
+            if last_x >= end_index:
+                r = 2
+
             if r == 1:
                 last_x += 1
                 self.tiles_coordinates.append((last_x, last_y))
@@ -167,7 +201,10 @@ class MainWidget(Widget):
         self.update_vertical_lines()
         self.update_horizontal_lines()
         self.update_tiles()
-        self.current_offset_y += self.speed * time_factor
+        self.update_ship()
+
+        speed_y = self.speed * self.height / 100
+        self.current_offset_y += speed_y * time_factor
 
         spacing_y = self.h_lines_spacing * self.height
         if self.current_offset_y >= spacing_y:
@@ -176,7 +213,8 @@ class MainWidget(Widget):
             # print("loop" + str(self.current_y_loop))
             self.generate_tiles_coordinates()
 
-        self.current_offset_x += self.current_speed_x * time_factor
+        speed_x = self.current_speed_x * self.width / 100
+        self.current_offset_x += speed_x * time_factor
 
 
 class GalaxyApp(App):
