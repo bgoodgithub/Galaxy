@@ -8,9 +8,13 @@
             size: self.size
     Label:
         text: root.parent.menu_title
+        font_size: dp(80)
         pos_hint: { "center_x": .5, "center_y": .6}
     Button:
         text: root.parent.menu_button_title
+        font_size: dp(30)
         pos_hint: { "center_x": .5, "center_y": .4}
         size_hint: .2, .1
         on_press: root.parent.on_menu_button_pressed()
+        background_normal: ""
+        background_color: 1, .5, 1
