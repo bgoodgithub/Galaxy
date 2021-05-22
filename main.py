@@ -11,7 +11,7 @@ from kivy import platform
 from kivy.core.window import Window
 from kivy.app import App
 from kivy.graphics import Line, Color, Quad, Triangle
-from kivy.properties import NumericProperty, Clock, ObjectProperty
+from kivy.properties import NumericProperty, Clock, ObjectProperty, StringProperty
 from kivy.uix.widget import Widget
 
 Builder.load_file("menu.kv")
@@ -54,6 +54,9 @@ class MainWidget(RelativeLayout):
     state_game_over = False
     state_game_has_started = False
 
+    menu_title = StringProperty("H Y P E R   S P A C E")
+    menu_button_title = StringProperty("START")
+
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
         # print("INIT W: " + str(self.width) + " H: " + str(self.height))
@@ -61,8 +64,7 @@ class MainWidget(RelativeLayout):
         self.init_horizontal_lines()
         self.init_tiles()
         self.init_ship()
-        self.pre_fill_tiles_coordinates()
-        self.generate_tiles_coordinates()
+        self.reset_game()
 
         if self.is_dektop():
             self._keyboard = Window.request_keyboard(self.keyboard_closed, self)
@@ -70,6 +72,16 @@ class MainWidget(RelativeLayout):
             self._keyboard.bind(on_key_up=self.on_keyboard_up)
 
         Clock.schedule_interval(self.update, 1.0 / 60.0)
+
+    def reset_game(self):
+        self.current_offset_y = 0
+        self.current_y_loop = 0
+        self.current_speed_x = 0
+        self.current_offset_x = 0
+        self.tiles_coordinates = []
+        self.pre_fill_tiles_coordinates()
+        self.generate_tiles_coordinates()
+        self.state_game_over = False
 
     def is_dektop(self):
         if platform in ("linux", "win", "macosx"):
@@ -145,7 +157,7 @@ class MainWidget(RelativeLayout):
             r = random.randint(0, 2)
             self.tiles_coordinates.append((last_x, last_y))
             start_index = -int(self.v_nb_lines / 2) + 1
-            end_index = start_index + self.v_nb_lines - 1
+            end_index = start_index + self.v_nb_lines - 2
             if last_x <= start_index:
                 r = 1
             if last_x >= end_index:
@@ -252,12 +264,14 @@ class MainWidget(RelativeLayout):
 
         if not self.check_ship_collision() and not self.state_game_over:
             self.state_game_over = True
+            self.menu_title = "G A M E   O V E R"
+            self.menu_button_title = "TRY AGAIN"
             self.menu_widget.opacity = 1
             print("GAME OVER")
 
     def on_menu_button_pressed(self):
         print("GAME START")
-        # self.reset_game()
+        self.reset_game()
         self.state_game_has_started = True
         self.menu_widget.opacity = 0
 
