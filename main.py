@@ -54,7 +54,7 @@ class MainWidget(RelativeLayout):
     state_game_over = False
     state_game_has_started = False
 
-    menu_title = StringProperty("H Y P E R   S P A C E")
+    menu_title = StringProperty("H Y P E R S P A C E")
     menu_button_title = StringProperty("START")
     score_txt = StringProperty()
 
@@ -93,7 +93,7 @@ class MainWidget(RelativeLayout):
 
     def init_ship(self):
         with self.canvas:
-            Color(1, 1, 1)
+            Color(1, 0, 1)
             self.ship = Triangle()
 
     def update_ship(self):
@@ -132,7 +132,7 @@ class MainWidget(RelativeLayout):
 
     def init_tiles(self):
         with self.canvas:
-            Color(.3, .7, 1)
+            Color(.9, .9, .9)
             for i in range(0, self.nb_tiles):
                 self.tiles.append(Quad())
 
@@ -267,12 +267,10 @@ class MainWidget(RelativeLayout):
         if not self.check_ship_collision() and not self.state_game_over:
             self.state_game_over = True
             self.menu_title = "G A M E   O V E R"
-            self.menu_button_title = "TRY AGAIN"
+            self.menu_button_title = "RETRY"
             self.menu_widget.opacity = 1
-            print("GAME OVER")
 
     def on_menu_button_pressed(self):
-        print("GAME START")
         self.reset_game()
         self.state_game_has_started = True
         self.menu_widget.opacity = 0

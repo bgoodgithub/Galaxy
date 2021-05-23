@@ -8,11 +8,13 @@
             size: self.size
     Label:
         text: root.parent.menu_title
-        font_size: dp(80)
+        font_name: "fonts/Varino - Normal.ttf"
+        font_size: dp(60)
         pos_hint: { "center_x": .5, "center_y": .6}
     Button:
         text: root.parent.menu_button_title
-        font_size: dp(30)
+        font_name: "fonts/Varino - Normal.ttf"
+        font_size: dp(25)
         pos_hint: { "center_x": .5, "center_y": .4}
         size_hint: .2, .1
         on_press: root.parent.on_menu_button_pressed()
